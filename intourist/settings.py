@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 
     'core',
     'points',
-    
 ]
 
 MIDDLEWARE = [
