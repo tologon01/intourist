@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect
-from .models import Points
-from .forms import PointsForm
+from django.shortcuts import render, redirect, HttpResponse
+from django.views.generic import FormView, DetailView
+from .models import Feedback, Points
+from .forms import PointsForm, FeedbackForm
 
 
 def points(request):
@@ -18,9 +19,11 @@ def create_points(request):
     return render(request, 'points/form.html', {'points_form': points_form})
 
 def point(request, id):
-    point_object = Points.objects.get(id=id)
-    return render(request, 'points/point.html', {'point_object': point_object})
-
+    try:
+        point_object = Points.objects.get(id=id)
+        return render(request, 'points/point.html', {'point_object': point_object})
+    except Points.DoesNotExist as e:
+        return HttpResponse(f'Not found:   {e}', status=404)
 def edit_point(request, id):
     point_object = Points.objects.get(id=id)
 
@@ -38,3 +41,16 @@ def delete_point(request, id):
     point_object = Points.objects.get(id=id)
     point_object.delete()
     return redirect(points)
+
+class FeedbackView(FormView):
+    template_name = 'points/feedback_form.html'
+    form_class = FeedbackForm
+    success_url = '/Points/'
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+class FeedbackDetailView(DetailView):
+    queryset = Feedback.objects.all()
+    template_name = 'points/feedback.html'
